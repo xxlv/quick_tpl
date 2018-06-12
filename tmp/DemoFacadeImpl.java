@@ -3,17 +3,17 @@ package com.ydl.user.service.facade;
 import com.ydl.common.dto.BaseDtoResponse;
 import com.ydl.common.helper.ResponseFormatterHelper;
 import com.ydl.common.utils.ModelMapperUtil;
-import com.ydl.user.intf.facade.${PLACE}Facade;
-import com.ydl.user.service.biz.${PLACE}Biz;
+import com.ydl.user.intf.facade.DemoFacade;
+import com.ydl.user.service.biz.DemoBiz;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
-public class ${PLACE}FacadeImpl implements ${PLACE}Facade {
+public class DemoFacadeImpl implements DemoFacade {
 
 	@Resource
-	private ${PLACE}Biz ${PLACE_VAR}Biz;
+	private DemoBiz demoBiz;
 
 
 }
