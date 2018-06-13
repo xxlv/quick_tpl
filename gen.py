@@ -195,10 +195,9 @@ def gen_po(res_name, project_target_path):
 
     local_mybatis_config_path = local_mybatis_config["tmp_mybatis_path"]
 
-    po_path = "{}/{}".format(MYBATIS_GEN_JAVA_PATH,"/".join(local_mybatis_config["po_path"].split(".")))
+    po_path = "{}/{}".format(MYBATIS_GEN_JAVA_PATH, "/".join(local_mybatis_config["po_path"].split(".")))
 
     print(po_path)
-
 
     gen_po_cmd = """
     java -jar {}/mybatis-generator-core-1.3.6.jar -configfile {}  -overwrite
@@ -209,13 +208,12 @@ def gen_po(res_name, project_target_path):
     print("----------------------------------------")
     os.system(gen_po_cmd)
 
-    with open("{}/{}.java".format(po_path,res_name), "r+") as f:
+    with open("{}/{}.java".format(po_path, res_name), "r+") as f:
         po = f.read()
 
     return po
 
 
-# 编译内容
 def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     """
     编译内容
@@ -252,15 +250,20 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     return identity
 
 
-# 获取编译后的名字
 def compile(body, compile_table):
+    """
+    编译
+
+    :param body:
+    :param compile_table:
+    :return:
+    """
     for d, v in compile_table.iteritems():
         body = body.replace(d, v)
 
     return body
 
 
-# clean tmp dir
 def clean_tmp():
     """
     清空临时目录
@@ -276,7 +279,6 @@ def clean_tmp():
     print("清空目录 {}".format(TMP))
 
 
-# gen
 def gen(res_name, look_path):
     """
     核心逻辑
@@ -294,6 +296,8 @@ def gen(res_name, look_path):
 
     PROJECT_TARGET_PATH = parse_ydl_project(look_path)
 
+    print(PROJECT_TARGET_PATH)
+
     if (PROJECT_TARGET_PATH):
         print("解析YDL Project 成功！")
     else:
@@ -303,17 +307,42 @@ def gen(res_name, look_path):
     compile_table = dict()
     compile_table['${PLACE}'] = "{}{}".format(res_name[0].upper(), res_name[1:])
     compile_table['${PLACE_VAR}'] = "{}{}".format(res_name[0].lower(), res_name[1:])
+
+    import re
+    intf = PROJECT_TARGET_PATH["intf_po_path"]
+
+    p = re.compile("[\s\S]*\/(.+)\-intf\/[\s\S]*")
+
+    matches = re.match(p, intf)
+
+    if matches is not None:
+        package = matches.group(1)
+    else:
+        package = ""
+        print("抱歉，无法在{} 中解析到包规则".format(look_path))
+        exit(-1)
+
+    package_list = package.split("-")
+    if len(package_list) != 2:
+        print("包解析失败啦~")
+        exit(-1)
+
+    package_level1 = package_list[0]
+    package_level2 = package_list[1]
+
+    compile_table['${PACKAGE_LEVEL1}'] = "{}".format(package_level1)
+    compile_table['${PACKAGE_LEVEL2}'] = "{}".format(package_level2)
+
     print("--------------------------------------")
     print("编译常量表")
     print("--------------------------------------")
-
     # 编译文件
     for root, dirs, files in os.walk(DIR, False):
         for file in files:
             if (file[0] == "$"):
                 compiled_file = compile_content(res_name, compile_table, os.path.join(root, file), TMP,
                                                 PROJECT_TARGET_PATH)
-                # safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
+                safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
 
 
 if __name__ == "__main__":
@@ -323,9 +352,11 @@ if __name__ == "__main__":
     print("-------------------------")
 
     parser = argparse.ArgumentParser(description="Auto create Resource for ydl java project")
-    parser.add_argument('--verbose', '-v', action='store_true', help='verbose mode')
+    parser.add_argument('--verbose', '-v', action='store_true', help='debug mode')
     parser.add_argument("resource_name")
+    parser.add_argument("package")
     parser.add_argument("project_path")
+
     args = parser.parse_args()
     project_path = args.project_path
     resource_name = args.resource_name

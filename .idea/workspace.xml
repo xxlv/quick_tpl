@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1abc04e8-e167-42cd-98ea-074bbb2150ed" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/gen.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -18,11 +16,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
+      <file leaf-file-name="gen.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/gen.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+            <state relative-caret-position="431">
+              <caret line="327" column="16" lean-forward="true" selection-start-line="327" selection-start-column="16" selection-end-line="327" selection-end-column="16" />
+              <folding>
+                <element signature="e#42#51#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -36,6 +37,7 @@
       <find>clean_tmp</find>
       <find>gen_po</find>
       <find>config_mybatis</find>
+      <find>compile_table</find>
     </findStrings>
     <replaceStrings>
       <replace>${PLACE}</replace>
@@ -53,8 +55,8 @@
         <option value="$PROJECT_DIR$/template/${PLACE}Biz.java" />
         <option value="$PROJECT_DIR$/heml.py" />
         <option value="$PROJECT_DIR$/tmp/generatorConfig.xml" />
-        <option value="$PROJECT_DIR$/gen.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/gen.py" />
       </list>
     </option>
   </component>
@@ -87,6 +89,11 @@
             <path>
               <item name="quick_tpl" type="b2602c69:ProjectViewProjectNode" />
               <item name="quick_tpl" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="quick_tpl" type="b2602c69:ProjectViewProjectNode" />
+              <item name="quick_tpl" type="462c0819:PsiDirectoryNode" />
+              <item name="template" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -208,8 +215,8 @@
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="9" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Terminal" order="7" visible="true" weight="0.329718" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25235197" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.329718" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.25235197" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="right" id="SciView" order="5" />
@@ -275,13 +282,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/gen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="12" column="17" lean-forward="true" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/template/${PLACE}Facade.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
@@ -471,13 +471,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/template/${PLACE}Biz.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="51" lean-forward="true" selection-start-line="14" selection-start-column="51" selection-end-line="14" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/template/${PLACE}BizImpl.java">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -535,16 +528,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="373">
-          <caret line="207" column="21" selection-start-line="207" selection-start-column="21" selection-end-line="207" selection-end-column="21" />
-          <folding>
-            <element signature="e#42#51#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tmp/About.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -555,7 +538,31 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
-          <caret line="1" column="5" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+          <caret line="1" column="5" lean-forward="true" selection-start-line="1" selection-start-column="5" selection-end-line="1" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/template/${PLACE}Biz.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="21" selection-start-column="21" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python2.7/re.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="137" column="4" selection-start-line="137" selection-start-column="4" selection-end-line="137" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="431">
+          <caret line="327" column="16" lean-forward="true" selection-start-line="327" selection-start-column="16" selection-end-line="327" selection-end-column="16" />
+          <folding>
+            <element signature="e#42#51#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
