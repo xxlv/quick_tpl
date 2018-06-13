@@ -130,6 +130,8 @@ def is_po(res_name, identity):
     :param identity:
     :return:
     """
+    res_name=res_name[0].upper()+res_name[1:]
+
     print("检测po {}  {}".format(res_name, identity.split("/")[-1]))
 
     return "{}.java".format(res_name) == identity.split("/")[-1]
@@ -158,14 +160,20 @@ def config_mybatis(res_name, table_name, mybatis_config_path):
                    enableDeleteByExample="false", enableSelectByExample="false", enableUpdateByExample="false",
                    selectByExampleQueryId="false")
 
+    classPathEntry = ET.Element("classPathEntry", location="{}/mysql-connector-java-5.1.25.jar".format(JAR_PATH))
     context = root.find("context")
+
+    root.getroot().insert(0,classPathEntry)
     context.append(e)
     po_path = context.find("javaModelGenerator").get("targetPackage")
 
     java_model_generator = context.find("javaModelGenerator")
     java_model_generator.set("targetProject", "{}/java/".format(TMP))
 
+
+
     tmp_mybatis_path = os.path.join(TMP, "generatorConfig.xml")
+
     root.write(tmp_mybatis_path, encoding="utf-8")
 
     with open(tmp_mybatis_path, "r+") as f:
@@ -209,7 +217,13 @@ def gen_po(res_name, project_target_path):
     print("----------------------------------------")
     os.system(gen_po_cmd)
 
-    with open("{}/{}.java".format(po_path, res_name), "r+") as f:
+    mybatis_gen_po_path="{}/{}.java".format(po_path, res_name)
+
+    if(not os.path.exists(mybatis_gen_po_path)):
+        print("无法获取到Mybatis 生成的po文件")
+        exit(-1)
+
+    with open(mybatis_gen_po_path, "r+") as f:
         po = f.read()
 
     return po
@@ -226,6 +240,8 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     :param project_target_path:
     :return:
     """
+
+    res_name=get_res_name(res_name)
     if not os.path.isdir(tmp):
         os.mkdir(tmp)
 
@@ -241,6 +257,7 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     # 检测如果当前的文件是PO的话，使用mybatis 生成po
     if is_po(res_name, identity):
         print("发现po {}".format(identity))
+
         with open(identity, "w+") as f:
             f.write(gen_po(res_name, project_target_path))
 
@@ -281,22 +298,47 @@ def clean_tmp():
 
 
 def get_res_name(res_name):
-    # TODO
-    # 转化为驼峰
-    pass
 
+    name= underline2hump(res_name)
+
+    return name[0].upper()+name[1:]
+
+def hump2underline(hunp_str):
+    '''
+    驼峰形式字符串转成下划线形式
+    :param hunp_str: 驼峰形式字符串
+    :return: 字母全小写的下划线形式字符串
+    '''
+    # 匹配正则，匹配小写字母和大写字母的分界位置
+    p = re.compile(r'([a-z]|\d)([A-Z])')
+    # 这里第二个参数使用了正则分组的后向引用
+    sub = re.sub(p, r'\1_\2', hunp_str).lower()
+    return sub
+
+def underline2hump(underline_str):
+    '''
+    下划线形式字符串转成驼峰形式
+    :param underline_str: 下划线形式字符串
+    :return: 驼峰形式字符串
+    '''
+    # 这里re.sub()函数第二个替换参数用到了一个匿名回调函数，回调函数的参数x为一个匹配对象，返回值为一个处理后的字符串
+    sub = re.sub(r'(_\w)',lambda x:x.group(1)[1].upper(),underline_str)
+    return sub
 
 def get_table_name(res_name):
-    table_name = ""
-    res_name = res_name[0:1].lower() + res_name[1:]
 
-    for i in range(0, len(res_name)):
-        t = res_name[i]
-        if (t.isupper()):
-            t = "".join(["_", t.lower()])
-        table_name = "".join([table_name, t])
-
-    return table_name
+    return hump2underline(res_name)
+    #
+    # table_name = ""
+    # res_name = res_name[0:1].lower() + res_name[1:]
+    #
+    # for i in range(0, len(res_name)):
+    #     t = res_name[i]
+    #     if (t.isupper()):
+    #         t = "".join(["_", t.lower()])
+    #     table_name = "".join([table_name, t])
+    #
+    # return table_name
 
 
 def gen(res_name, look_path):
@@ -329,6 +371,7 @@ def gen(res_name, look_path):
 
     intf = PROJECT_TARGET_PATH["intf_po_path"]
 
+    # 检索包名
     p = re.compile("[\s\S]*\/(.+)\-intf\/[\s\S]*")
 
     matches = re.match(p, intf)
@@ -368,18 +411,17 @@ def gen(res_name, look_path):
 
 
 if __name__ == "__main__":
+
     print("-------------------------")
     print("Start Building your Resource")
     print("Draw by ghost ")
     print("-------------------------")
-
     parser = argparse.ArgumentParser(description="Auto create Resource for ydl java project")
-    parser.add_argument('--verbose', '-v', action='store_true', help='debug mode')
+
     parser.add_argument("resource_name")
     parser.add_argument("project_path")
-
     args = parser.parse_args()
+
     project_path = args.project_path
     resource_name = args.resource_name
-
     gen(resource_name, project_path)

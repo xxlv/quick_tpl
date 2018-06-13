@@ -15,5 +15,8 @@ public class ${PLACE}BizImpl extends BaseService<${PLACE}> implements ${PLACE}Bi
 	@Resource
 	private ${PLACE}Mapper ${PLACE_VAR}Mapper;
 
-
+	@Override
+	public ${PLACE} create${PLACE}(${PLACE} ${PLACE_VAR}) {
+		return null;
+	}
 }
