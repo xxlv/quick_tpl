@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 DIR = "./template"
 TMP = "./tmp"
 JAR_PATH = "./jar"
+MYBATIS_GEN_JAVA_PATH = "{}/java".format(TMP)
 
 
 def parse_ydl_project(path):
@@ -74,6 +75,14 @@ def parse_ydl_project(path):
 
 # cp文件
 def safe_cpfile(f, target_path_map, res_name):
+    """
+    cp文件到project path
+
+    :param f:
+    :param target_path_map:
+    :param res_name:
+    :return:
+    """
     res_name = res_name[0].upper() + res_name[1:]
 
     if f is None:
@@ -113,6 +122,13 @@ def safe_cpfile(f, target_path_map, res_name):
 
 
 def is_po(res_name, identity):
+    """
+    检测是否是po
+
+    :param res_name:
+    :param identity:
+    :return:
+    """
     print("检测po {}  {}".format(res_name, identity.split("/")[-1]))
 
     return "{}.java".format(res_name) == identity.split("/")[-1]
@@ -143,10 +159,20 @@ def config_mybatis(res_name, table_name, mybatis_config_path):
 
     context = root.find("context")
     context.append(e)
-    tmp_mybatis_path = os.path.join(TMP, "generatorConfig.xml")
-    root.write(tmp_mybatis_path,encoding="utf-8")
+    po_path = context.find("javaModelGenerator").get("targetPackage")
 
-    return tmp_mybatis_path
+    java_model_generator = context.find("javaModelGenerator")
+    java_model_generator.set("targetProject", "{}/java/".format(TMP))
+
+    tmp_mybatis_path = os.path.join(TMP, "generatorConfig.xml")
+    root.write(tmp_mybatis_path, encoding="utf-8")
+
+    with open(tmp_mybatis_path, "r+") as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(head + content)
+
+    return {"tmp_mybatis_path": tmp_mybatis_path, "po_path": po_path}
 
 
 def gen_po(res_name, project_target_path):
@@ -165,23 +191,28 @@ def gen_po(res_name, project_target_path):
 
     tables_name = res_name
 
-    local_mybatis_config=config_mybatis(res_name, tables_name, mybatis_config_path)
+    local_mybatis_config = config_mybatis(res_name, tables_name, mybatis_config_path)
+
+    local_mybatis_config_path = local_mybatis_config["tmp_mybatis_path"]
+
+    po_path = "{}/{}".format(MYBATIS_GEN_JAVA_PATH,"/".join(local_mybatis_config["po_path"].split(".")))
+
+    print(po_path)
 
 
     gen_po_cmd = """
     java -jar {}/mybatis-generator-core-1.3.6.jar -configfile {}  -overwrite
-    """.format(JAR_PATH, local_mybatis_config)
+    """.format(JAR_PATH, local_mybatis_config_path)
+
     print("----------------------------------------")
     print(gen_po_cmd)
     print("----------------------------------------")
+    os.system(gen_po_cmd)
 
-    # os.system(gen_po_cmd)
+    with open("{}/{}.java".format(po_path,res_name), "r+") as f:
+        po = f.read()
 
-    return "PO"
-
-
-def rewrite_mybatis_config():
-    pass
+    return po
 
 
 # 编译内容
@@ -236,9 +267,12 @@ def clean_tmp():
 
     :return:
     """
-    for root, dirs, files in os.walk(TMP, False):
-        for file in files:
-            os.remove(os.path.join(root, file))
+    if (os.path.isdir(TMP)):
+        shutil.rmtree(TMP)
+
+    os.mkdir(TMP)
+    os.mkdir(MYBATIS_GEN_JAVA_PATH)
+
     print("清空目录 {}".format(TMP))
 
 
