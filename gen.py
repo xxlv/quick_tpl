@@ -5,6 +5,7 @@ import os
 import shutil
 import argparse
 import xml.etree.ElementTree as ET
+import re
 
 DIR = "./template"
 TMP = "./tmp"
@@ -189,7 +190,7 @@ def gen_po(res_name, project_target_path):
         print("Mybatis 路径有误")
         exit(-1)
 
-    tables_name = res_name
+    tables_name = get_table_name(res_name)
 
     local_mybatis_config = config_mybatis(res_name, tables_name, mybatis_config_path)
 
@@ -279,6 +280,25 @@ def clean_tmp():
     print("清空目录 {}".format(TMP))
 
 
+def get_res_name(res_name):
+    # TODO
+    # 转化为驼峰
+    pass
+
+
+def get_table_name(res_name):
+    table_name = ""
+    res_name = res_name[0:1].lower() + res_name[1:]
+
+    for i in range(0, len(res_name)):
+        t = res_name[i]
+        if (t.isupper()):
+            t = "".join(["_", t.lower()])
+        table_name = "".join([table_name, t])
+
+    return table_name
+
+
 def gen(res_name, look_path):
     """
     核心逻辑
@@ -288,8 +308,7 @@ def gen(res_name, look_path):
     :return:
     """
     clean_tmp()
-
-    res_name = res_name[0].upper() + res_name[1:]
+    res_name = get_res_name(res_name)
     print("----------------------------------")
     print("你的资源名称为 {}".format(res_name))
     print("----------------------------------")
@@ -308,7 +327,6 @@ def gen(res_name, look_path):
     compile_table['${PLACE}'] = "{}{}".format(res_name[0].upper(), res_name[1:])
     compile_table['${PLACE_VAR}'] = "{}{}".format(res_name[0].lower(), res_name[1:])
 
-    import re
     intf = PROJECT_TARGET_PATH["intf_po_path"]
 
     p = re.compile("[\s\S]*\/(.+)\-intf\/[\s\S]*")
@@ -344,6 +362,10 @@ def gen(res_name, look_path):
                                                 PROJECT_TARGET_PATH)
                 safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
 
+    print("---------------------------------------------")
+    print("你已经成功的生成了代码")
+    print("---------------------------------------------")
+
 
 if __name__ == "__main__":
     print("-------------------------")
@@ -354,7 +376,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Auto create Resource for ydl java project")
     parser.add_argument('--verbose', '-v', action='store_true', help='debug mode')
     parser.add_argument("resource_name")
-    parser.add_argument("package")
     parser.add_argument("project_path")
 
     args = parser.parse_args()

@@ -1,8 +1,8 @@
-package com.ydl.user.service.biz.impl;
+package com.${PACKAGE_LEVEL1}.${PACKAGE_LEVEL2}.service.biz.impl;
 
-import com.ydl.user.intf.po.${PLACE};
-import com.ydl.user.service.biz.${PLACE}Biz;
-import com.ydl.user.service.dao.${PLACE}Mapper;
+import com.${PACKAGE_LEVEL1}.${PACKAGE_LEVEL2}.intf.po.${PLACE};
+import com.${PACKAGE_LEVEL1}.${PACKAGE_LEVEL2}.service.biz.${PLACE}Biz;
+import com.${PACKAGE_LEVEL1}.${PACKAGE_LEVEL2}.service.dao.${PLACE}Mapper;
 import org.springframework.stereotype.Service;
 
 import com.ydl.common.service.impl.BaseService;
