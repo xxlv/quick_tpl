@@ -11,7 +11,7 @@ DIR = "./template"
 TMP = "./tmp"
 JAR_PATH = "./jar"
 MYBATIS_GEN_JAVA_PATH = "{}/java".format(TMP)
-
+PO=""
 
 def parse_ydl_project(path):
     """
@@ -122,6 +122,10 @@ def safe_cpfile(f, target_path_map, res_name):
     print("move 当前的文件{} 到 {}".format(f, target_path))
 
 
+def is_dto(path):
+    return path[-8:]=="Dto.java"
+
+
 def is_po(res_name, identity):
     """
     检测是否是po
@@ -130,7 +134,7 @@ def is_po(res_name, identity):
     :param identity:
     :return:
     """
-    res_name=res_name[0].upper()+res_name[1:]
+    res_name = res_name[0].upper() + res_name[1:]
 
     print("检测po {}  {}".format(res_name, identity.split("/")[-1]))
 
@@ -163,14 +167,12 @@ def config_mybatis(res_name, table_name, mybatis_config_path):
     classPathEntry = ET.Element("classPathEntry", location="{}/mysql-connector-java-5.1.25.jar".format(JAR_PATH))
     context = root.find("context")
 
-    root.getroot().insert(0,classPathEntry)
+    root.getroot().insert(0, classPathEntry)
     context.append(e)
     po_path = context.find("javaModelGenerator").get("targetPackage")
 
     java_model_generator = context.find("javaModelGenerator")
     java_model_generator.set("targetProject", "{}/java/".format(TMP))
-
-
 
     tmp_mybatis_path = os.path.join(TMP, "generatorConfig.xml")
 
@@ -217,14 +219,16 @@ def gen_po(res_name, project_target_path):
     print("----------------------------------------")
     os.system(gen_po_cmd)
 
-    mybatis_gen_po_path="{}/{}.java".format(po_path, res_name)
+    mybatis_gen_po_path = "{}/{}.java".format(po_path, res_name)
 
-    if(not os.path.exists(mybatis_gen_po_path)):
+    if (not os.path.exists(mybatis_gen_po_path)):
         print("无法获取到Mybatis 生成的po文件")
         exit(-1)
 
     with open(mybatis_gen_po_path, "r+") as f:
+
         po = f.read()
+
 
     return po
 
@@ -240,8 +244,10 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     :param project_target_path:
     :return:
     """
+    global PO
 
-    res_name=get_res_name(res_name)
+
+    res_name = get_res_name(res_name)
     if not os.path.isdir(tmp):
         os.mkdir(tmp)
 
@@ -259,7 +265,9 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
         print("发现po {}".format(identity))
 
         with open(identity, "w+") as f:
-            f.write(gen_po(res_name, project_target_path))
+            po_body = gen_po(res_name, project_target_path)
+            PO=po_body
+            f.write(po_body)
 
     print("--------------------------------")
     print("成功编译文件 {} [{}]".format(identity, len(body)))
@@ -298,10 +306,10 @@ def clean_tmp():
 
 
 def get_res_name(res_name):
+    name = underline2hump(res_name)
 
-    name= underline2hump(res_name)
+    return name[0].upper() + name[1:]
 
-    return name[0].upper()+name[1:]
 
 def hump2underline(hunp_str):
     '''
@@ -315,6 +323,7 @@ def hump2underline(hunp_str):
     sub = re.sub(p, r'\1_\2', hunp_str).lower()
     return sub
 
+
 def underline2hump(underline_str):
     '''
     下划线形式字符串转成驼峰形式
@@ -322,26 +331,17 @@ def underline2hump(underline_str):
     :return: 驼峰形式字符串
     '''
     # 这里re.sub()函数第二个替换参数用到了一个匿名回调函数，回调函数的参数x为一个匹配对象，返回值为一个处理后的字符串
-    sub = re.sub(r'(_\w)',lambda x:x.group(1)[1].upper(),underline_str)
+    sub = re.sub(r'(_\w)', lambda x: x.group(1)[1].upper(), underline_str)
     return sub
 
-def get_table_name(res_name):
 
+def get_table_name(res_name):
     return hump2underline(res_name)
-    #
-    # table_name = ""
-    # res_name = res_name[0:1].lower() + res_name[1:]
-    #
-    # for i in range(0, len(res_name)):
-    #     t = res_name[i]
-    #     if (t.isupper()):
-    #         t = "".join(["_", t.lower()])
-    #     table_name = "".join([table_name, t])
-    #
-    # return table_name
 
 
 def gen(res_name, look_path):
+
+    global PO
     """
     核心逻辑
 
@@ -398,20 +398,52 @@ def gen(res_name, look_path):
     print("编译常量表")
     print("--------------------------------------")
     # 编译文件
+    compiled_file_list = []
+
     for root, dirs, files in os.walk(DIR, False):
         for file in files:
             if (file[0] == "$"):
                 compiled_file = compile_content(res_name, compile_table, os.path.join(root, file), TMP,
                                                 PROJECT_TARGET_PATH)
-                safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
+                compiled_file_list.append(compiled_file)
 
+                # safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
+
+    # 考虑生成dto
+
+    # PO="""
+    # Cats are {smarter} than dogs
+    #
+    # """
+    matchObj = re.match("[\s\S]+class (\w+) {([\s\S]+)}(.*?)[\s\S]+", PO)
+
+    if(matchObj is not None):
+        PO=matchObj.group(2)
+        print(PO)
+        if PO[-1]!="}":
+            PO+="\n    }"
+
+
+    po_body=PO
+    for compiled_file in compiled_file_list:
+        if is_dto(compiled_file):
+            with open(compiled_file,"r+") as f:
+                dto_body=f.read()
+                dto_body=dto_body.replace("${PO}",po_body)
+
+            with open(compiled_file,"w+") as f:
+                f.write(dto_body)
+
+
+        safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
+
+    # clean_tmp()
     print("---------------------------------------------")
     print("你已经成功的生成了代码")
     print("---------------------------------------------")
 
 
 if __name__ == "__main__":
-
     print("-------------------------")
     print("Start Building your Resource")
     print("Draw by ghost ")
