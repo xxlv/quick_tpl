@@ -11,7 +11,8 @@ DIR = "./template"
 TMP = "./tmp"
 JAR_PATH = "./jar"
 MYBATIS_GEN_JAVA_PATH = "{}/java".format(TMP)
-PO=""
+PO = ""
+
 
 def parse_ydl_project(path):
     """
@@ -65,6 +66,7 @@ def parse_ydl_project(path):
     d["service_sql_xml_path"] = service_sql_xml_path
     d["service_dao_path"] = service_dao_path
     d["mybatis_config_path"] = service_sql_mybatis_generator_config_path
+    d["base_path"] = "/".join(abs_path + [identity, project_prefix])
 
     for id, path in d.iteritems():
         if (not os.path.exists(path)):
@@ -123,7 +125,7 @@ def safe_cpfile(f, target_path_map, res_name):
 
 
 def is_dto(path):
-    return path[-8:]=="Dto.java"
+    return path[-8:] == "Dto.java"
 
 
 def is_po(res_name, identity):
@@ -229,7 +231,6 @@ def gen_po(res_name, project_target_path):
 
         po = f.read()
 
-
     return po
 
 
@@ -245,7 +246,6 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
     :return:
     """
     global PO
-
 
     res_name = get_res_name(res_name)
     if not os.path.isdir(tmp):
@@ -266,7 +266,7 @@ def compile_content(res_name, compile_table, origin, tmp, project_target_path):
 
         with open(identity, "w+") as f:
             po_body = gen_po(res_name, project_target_path)
-            PO=po_body
+            PO = po_body
             f.write(po_body)
 
     print("--------------------------------")
@@ -339,8 +339,16 @@ def get_table_name(res_name):
     return hump2underline(res_name)
 
 
-def gen(res_name, look_path):
+def run_tests(path):
+    c = """
+    cd {} && mvn clean test
 
+    """.format(path)
+    if os.path.isdir(path) and os.path.exists(os.path.join(path, "pom.xml")):
+        os.system(c)
+
+
+def gen(res_name, look_path):
     global PO
     """
     核心逻辑
@@ -407,39 +415,33 @@ def gen(res_name, look_path):
                                                 PROJECT_TARGET_PATH)
                 compiled_file_list.append(compiled_file)
 
-                # safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
-
-    # 考虑生成dto
-
-    # PO="""
-    # Cats are {smarter} than dogs
-    #
-    # """
     matchObj = re.match("[\s\S]+class (\w+) {([\s\S]+)}(.*?)[\s\S]+", PO)
 
-    if(matchObj is not None):
-        PO=matchObj.group(2)
+    if (matchObj is not None):
+        PO = matchObj.group(2)
         print(PO)
-        if PO[-1]!="}":
-            PO+="\n    }"
+        if PO[-1] != "}":
+            PO += "\n    }"
 
-
-    po_body=PO
+    po_body = PO
     for compiled_file in compiled_file_list:
         if is_dto(compiled_file):
-            with open(compiled_file,"r+") as f:
-                dto_body=f.read()
-                dto_body=dto_body.replace("${PO}",po_body)
+            with open(compiled_file, "r+") as f:
+                dto_body = f.read()
+                dto_body = dto_body.replace("${PO}", po_body)
 
-            with open(compiled_file,"w+") as f:
+            with open(compiled_file, "w+") as f:
                 f.write(dto_body)
-
 
         safe_cpfile(compiled_file, PROJECT_TARGET_PATH, res_name)
 
-    # clean_tmp()
+    clean_tmp()
+
+    run_tests(PROJECT_TARGET_PATH["base_path"])
+
     print("---------------------------------------------")
-    print("你已经成功的生成了代码")
+    print("\033[27;32;40m\t恭喜~~你的工作完成了\033[0m")
+
     print("---------------------------------------------")
 
 
