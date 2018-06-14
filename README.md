@@ -40,6 +40,7 @@ python gen.py  table_name path/to/project
 - 会自动用po的内容默认填充dto(req&resp)
 - 会将文件copy到 /path/to/project 的正确位置
 - 会自动触发单元测试
+- 会自动根据/path/to/project 的路径生成package
 
 
 ##### Rollback
