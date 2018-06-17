@@ -1,2 +1,5 @@
 tmp
 .idea
+quick_generator.egg-info
+build
+dist

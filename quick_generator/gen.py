@@ -7,9 +7,9 @@ import argparse
 import xml.etree.ElementTree as ET
 import re
 
-DIR = "./template"
-TMP = "./tmp"
-JAR_PATH = "./jar"
+DIR = os.path.join(".","template")
+TMP = os.path.join(".","tmp")
+JAR_PATH = os.path.join(".","jar")
 MYBATIS_GEN_JAVA_PATH = "{}/java".format(TMP)
 PO = ""
 
@@ -211,7 +211,6 @@ def gen_po(res_name, project_target_path):
     po_path = "{}/{}".format(MYBATIS_GEN_JAVA_PATH, "/".join(local_mybatis_config["po_path"].split(".")))
 
     print(po_path)
-
     gen_po_cmd = """
     java -jar {}/mybatis-generator-core-1.3.6.jar -configfile {}  -overwrite
     """.format(JAR_PATH, local_mybatis_config_path)
@@ -408,6 +407,7 @@ def gen(res_name, look_path):
     # 编译文件
     compiled_file_list = []
 
+    print(DIR)
     for root, dirs, files in os.walk(DIR, False):
         for file in files:
             if (file[0] == "$"):
@@ -445,7 +445,7 @@ def gen(res_name, look_path):
     print("---------------------------------------------")
 
 
-if __name__ == "__main__":
+def main():
     print("-------------------------")
     print("Start Building your Resource")
     print("Draw by ghost ")
@@ -459,3 +459,7 @@ if __name__ == "__main__":
     project_path = args.project_path
     resource_name = args.resource_name
     gen(resource_name, project_path)
+
+
+if __name__ == "__main__":
+    main()
